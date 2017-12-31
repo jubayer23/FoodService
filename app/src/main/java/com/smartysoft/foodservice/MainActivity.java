@@ -217,7 +217,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("email", email);
+                params.put("username", email);
                 params.put("password", password);
                 params.put("fcmId",fcmId);
                 params.put("authImie", authImie);

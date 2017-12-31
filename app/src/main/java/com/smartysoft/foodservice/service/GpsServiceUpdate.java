@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -52,7 +53,7 @@ public class GpsServiceUpdate extends Service {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0; // 10 meters
 
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 20000; // 1 minute
+    private static final long MIN_TIME_BW_UPDATES = 10000; // 1 minute
 
     @Override
     public void onCreate() {
@@ -105,7 +106,7 @@ public class GpsServiceUpdate extends Service {
 
         @Override
         public void onLocationChanged(Location location) {
-            //  Log.d("DEBUG", "change");
+             Log.d("DEBUG", "change");
 
             final double loc_lat = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLatitude());
             final double loc_lng = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLongitude());
@@ -143,10 +144,6 @@ public class GpsServiceUpdate extends Service {
                     }else{
                         stopSelf();
                     }
-
-
-
-
                 }
                 previousBestLocation = location;
             }
@@ -178,7 +175,12 @@ public class GpsServiceUpdate extends Service {
                     @Override
                     public void onResponse(String response) {
 
-                        response.replaceAll("\\s+", "");
+                        response = response.replaceAll("\\s+", "");
+
+                        Log.d("DEBUG",response);
+
+
+
 
 
 

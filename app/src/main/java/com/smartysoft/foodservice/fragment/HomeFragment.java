@@ -111,7 +111,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     final double loc_lat = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLatitude());
                     final double loc_lng = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLongitude());
                     //Got the location!
-                    dismissProgressDialog();
+                    //dismissProgressDialog();
                     hitUrlForStartGps(GlobalAppAccess.URL_DELIVERY_BOY_LOCATION,
                             MydApplication.getInstance().getPrefManger().getUserProfile().getId(),
                             loc_lat, loc_lng);
@@ -186,7 +186,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private void hitUrlForStartGps(String url, final String id, final double lat, final double lng) {
         // TODO Auto-generated method stub
 
-        showProgressDialog("Start Patrolling....", true, false);
+        //showProgressDialog("Start Delivery....", true, false);
 
         final StringRequest req = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -225,7 +225,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             public void onErrorResponse(VolleyError error) {
 
                 dismissProgressDialog();
-                AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(), "Error", "Network error", false);
+                AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(), "Error", "Network error!", false);
             }
         }) {
             @Override

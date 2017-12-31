@@ -11,7 +11,7 @@
         android:background="@drawable/btn_selector_green_round"
         android:paddingBottom="15dp"
         android:paddingTop="15dp"
-        android:text="Start Patrolling"
+        android:text="Start Delivery"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold" />
@@ -24,7 +24,7 @@
         android:background="@drawable/btn_selector_blue_deep_round"
         android:paddingBottom="15dp"
         android:paddingTop="15dp"
-        android:text="Stop Patrolling"
+        android:text="Stop Delivery"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold"
