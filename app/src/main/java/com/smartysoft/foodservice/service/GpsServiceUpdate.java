@@ -135,7 +135,7 @@ public class GpsServiceUpdate extends Service {
 
                     if(!MydApplication.getInstance().getPrefManger().getPathId().isEmpty()){
                         hitUrlForGps(
-                                GlobalAppAccess.URL_SOLDIER_LOCATION,
+                                GlobalAppAccess.URL_DELIVERY_BOY_LOCATION,
                                 MydApplication.getInstance().getPrefManger().getUserProfile().getId(),
                                 MydApplication.getInstance().getPrefManger().getPathId(),
                                 user_lat,

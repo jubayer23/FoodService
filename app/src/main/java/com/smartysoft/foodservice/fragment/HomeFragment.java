@@ -112,7 +112,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     final double loc_lng = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLongitude());
                     //Got the location!
                     dismissProgressDialog();
-                    hitUrlForStartGps(GlobalAppAccess.URL_SOLDIER_LOCATION,
+                    hitUrlForStartGps(GlobalAppAccess.URL_DELIVERY_BOY_LOCATION,
                             MydApplication.getInstance().getPrefManger().getUserProfile().getId(),
                             loc_lat, loc_lng);
                 }
@@ -158,7 +158,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         //dismissProgressDialog();
 
                         hitUrlForStopGps(
-                                GlobalAppAccess.URL_SOLDIER_LOCATION,
+                                GlobalAppAccess.URL_DELIVERY_BOY_LOCATION,
                                 MydApplication.getInstance().getPrefManger().getUserProfile().getId(),
                                 String.valueOf(stop_lat),
                                 String.valueOf(stop_lang),
@@ -289,7 +289,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 params.put("longitude", lng);
                 params.put("pathId", pathId);
                 params.put("authImie", authImie);
-                params.put("endPatrol", "true");
+                params.put("endPath", "true");
                 return params;
             }
         };
