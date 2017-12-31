@@ -151,4 +151,10 @@ public class CommonMethods {
             return false;
         }
     }
+
+    public static double roundFloatToFiveDigitAfterDecimal(double value){
+
+        return (double) Math.round(value * 100000d) / 100000d;
+
+    }
 }

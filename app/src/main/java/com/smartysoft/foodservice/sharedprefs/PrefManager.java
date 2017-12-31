@@ -43,6 +43,10 @@ public class PrefManager {
     private static final String KEY_RECEIVED_CARD_OBJ = "received_card_obj";
     private static final String KEY_FAV_SERVICE = "fav_service";
     private static final String KEY_EMAIL_CACHE = "key_email_cache";
+    private static final String KEY_PETROL_ID = "patrol_id";
+
+    private static final String KEY_USER_START_LAT = "user_start_lat";
+    private static final String KEY_USER_START_LANG = "user_start_lng";
 
     public PrefManager(Context context) {
         this._context = context;
@@ -86,7 +90,37 @@ public class PrefManager {
         return GSON.fromJson(gson, User.class);
     }
 
+    public void setPathId(String type) {
+        editor = pref.edit();
 
+        editor.putString(KEY_PETROL_ID, type);
+        // commit changes
+        editor.commit();
+    }
+
+    public String getPathId() {
+        return pref.getString(KEY_PETROL_ID, "");
+    }
+
+    public void setUserStartLat(String value) {
+        editor = pref.edit();
+        editor.putString(KEY_USER_START_LAT, value);
+        editor.commit();
+    }
+
+    public String getUserStartLat() {
+        return pref.getString(KEY_USER_START_LAT, "0");
+    }
+
+    public void setUserStartLang(String value) {
+        editor = pref.edit();
+        editor.putString(KEY_USER_START_LANG, value);
+        editor.commit();
+    }
+
+    public String getUserStartLang() {
+        return pref.getString(KEY_USER_START_LANG, "0");
+    }
 
 
 }

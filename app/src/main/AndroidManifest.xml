@@ -29,6 +29,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".HomeActivity"></activity>
+
+
+
+        <service
+            android:name=".service.GpsServiceUpdate"
+            android:enabled="true" />
     </application>
 
 </manifest>
