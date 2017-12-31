@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
@@ -25,6 +26,9 @@ import com.smartysoft.foodservice.model.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
@@ -46,7 +50,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
             finish();
             return;
         }
-
 
 
         setContentView(R.layout.activity_main);
@@ -112,7 +115,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
 
         if (id == R.id.btn_submit) {
-            Log.d("DEBUG","this is called");
+            Log.d("DEBUG", "this is called");
             String imie = DeviceInfoUtils.getDeviceImieNumber(this);
             Log.d("DEBUG", imie);
             if (isValidCredentialsProvided() && imie != null && !imie.isEmpty()) {
@@ -165,11 +168,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     public void sendRequestForLogin(String url, final String email, final String password, final String authImie, final String fcmId) {
 
-        url = url + "?" + "email=" + email + "&password=" + password;
+        //url = url + "?" + "email=" + email + "&password=" + password;
         // TODO Auto-generated method stub
         showProgressDialog("Loading..", true, false);
 
-        final StringRequest req = new StringRequest(Request.Method.GET, url,
+        final StringRequest req = new StringRequest(Request.Method.POST, url,
                 new com.android.volley.Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -209,17 +212,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 AlertDialogForAnything.showAlertDialogWhenComplte(MainActivity.this, "Error", "Network problem. please try again!", false);
 
             }
-        })// {
+        }) {
 
-                // @Override
-                // protected Map<String, String> getParams() throws AuthFailureError {
-                //    Map<String, String> params = new HashMap<String, String>();
-                //    params.put("email", email);
-                //     params.put("password", password);
-                ///     return params;
-                //  }
-                //}
-                ;
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("email", email);
+                params.put("password", password);
+                params.put("fcmId",fcmId);
+                params.put("authImie", authImie);
+                return params;
+            }
+        };
 
         req.setRetryPolicy(new DefaultRetryPolicy(60000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
