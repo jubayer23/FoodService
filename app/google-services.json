@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "986438261718",
+    "firebase_url": "https://demopushnotification-a2c7c.firebaseio.com",
+    "project_id": "demopushnotification-a2c7c",
+    "storage_bucket": "demopushnotification-a2c7c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986438261718:android:d7359836569a464b",
+        "android_client_info": {
+          "package_name": "com.creative.pushnotification"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "986438261718-romj1aq6524ilvc6kgqug1po2cfkeo4h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.creative.pushnotification",
+            "certificate_hash": "3fd3e5dd96756a8f4b3d45f4e66daa1db786cad1"
+          }
+        },
+        {
+          "client_id": "986438261718-uughroovmfn65329bhrejk8j3mhqhrjv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4Cz6ZflmIWC-85qG7kvB0U52t9l4G2sA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "986438261718-uughroovmfn65329bhrejk8j3mhqhrjv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986438261718:android:914075847a87e45a",
+        "android_client_info": {
+          "package_name": "com.smartysoft.foodservice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "986438261718-d5mmugr0hckn81fcuq5n4d6tknl60f8o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smartysoft.foodservice",
+            "certificate_hash": "3fd3e5dd96756a8f4b3d45f4e66daa1db786cad1"
+          }
+        },
+        {
+          "client_id": "986438261718-uughroovmfn65329bhrejk8j3mhqhrjv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4Cz6ZflmIWC-85qG7kvB0U52t9l4G2sA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "986438261718-uughroovmfn65329bhrejk8j3mhqhrjv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
