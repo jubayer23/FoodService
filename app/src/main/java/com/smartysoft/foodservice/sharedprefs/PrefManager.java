@@ -47,6 +47,7 @@ public class PrefManager {
 
     private static final String KEY_USER_START_LAT = "user_start_lat";
     private static final String KEY_USER_START_LANG = "user_start_lng";
+    private static final String KEY_FCM_REG_ID = "fcm_reg_id";
 
     public PrefManager(Context context) {
         this._context = context;
@@ -122,5 +123,15 @@ public class PrefManager {
         return pref.getString(KEY_USER_START_LANG, "0");
     }
 
+    public void setFcmRegId(String obj) {
+        editor = pref.edit();
 
+        editor.putString(KEY_FCM_REG_ID, obj);
+
+        // commit changes
+        editor.commit();
+    }
+    public String getFcmRegId() {
+        return pref.getString(KEY_FCM_REG_ID,"");
+    }
 }

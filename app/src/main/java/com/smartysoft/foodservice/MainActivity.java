@@ -57,6 +57,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         init();
 
         initializeCacheValue();
+
+        Log.d("DEBUG_fcm_id",MydApplication.getInstance().getPrefManger().getFcmRegId());
     }
 
 

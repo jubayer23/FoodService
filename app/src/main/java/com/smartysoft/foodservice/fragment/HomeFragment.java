@@ -1,16 +1,24 @@
 package com.smartysoft.foodservice.fragment;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -26,6 +34,7 @@ import com.smartysoft.foodservice.Utility.UserLastKnownLocation;
 import com.smartysoft.foodservice.alertbanner.AlertDialogForAnything;
 import com.smartysoft.foodservice.appdata.GlobalAppAccess;
 import com.smartysoft.foodservice.appdata.MydApplication;
+import com.smartysoft.foodservice.firebase.utils.NotificationUtils;
 import com.smartysoft.foodservice.service.GpsServiceUpdate;
 
 import org.json.JSONException;
@@ -71,6 +80,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onActivityCreated(Bundle SavedInstanceState) {
         super.onActivityCreated(SavedInstanceState);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // register GCM registration complete receiver
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(GlobalAppAccess.REGISTRATION_COMPLETE));
+
+        // register new push message receiver
+        // by doing this, the activity will be notified each time a new message arrives
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(GlobalAppAccess.PUSH_NOTIFICATION));
+
+        // clear the notification area when the app is opened
+        NotificationUtils.clearNotifications(getActivity());
+    }
+
+    @Override
+    public void onPause() {
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
     }
 
     private void init(View view) {
@@ -318,6 +350,79 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btn_stop_patrolling.setVisibility(View.GONE);
 
         MydApplication.getInstance().getPrefManger().setPathId("");
+    }
+
+    BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            // checking for type intent filter
+            if (intent.getAction().equals(GlobalAppAccess.REGISTRATION_COMPLETE)) {
+                // gcm successfully registered
+                // now subscribe to `global` topic to receive app wide notifications
+                //FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
+
+               // displayFirebaseRegId();
+
+                Log.d("DEBUG_fcm_id",MydApplication.getInstance().getPrefManger().getFcmRegId());
+
+            } else if (intent.getAction().equals(GlobalAppAccess.PUSH_NOTIFICATION)) {
+                // new push notification is received
+
+               // String title = intent.getStringExtra("title");
+                String message = intent.getStringExtra("message");
+               // String address = intent.getStringExtra("address");
+               // String mobile = intent.getStringExtra("mobile");
+
+
+                Toast.makeText(getActivity(), "Push notification: " + message, Toast.LENGTH_LONG).show();
+
+                //showNotificationDialog(title,message,address,mobile);
+
+                //txtMessage.setText(message);
+            }
+        }
+    };
+
+    private void showNotificationDialog(String title, String message, String address, String mobile) {
+        final Dialog dialog_start = new Dialog(getActivity(),
+                android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+        dialog_start.setCancelable(true);
+        dialog_start.setContentView(R.layout.dialog_notification);
+
+        TextView tv_description = (TextView) dialog_start.findViewById(R.id.tv_description);
+        TextView tv_address = (TextView) dialog_start.findViewById(R.id.tv_address);
+        TextView tv_mobile = (TextView) dialog_start.findViewById(R.id.tv_mobile);
+        Button btn_later = (Button) dialog_start.findViewById(R.id.btn_later) ;
+        Button btn_start = (Button) dialog_start.findViewById(R.id.btn_start);
+
+
+
+
+        tv_description.setText(message);
+
+        tv_address.setText(address);
+
+        tv_mobile.setText(mobile);
+
+
+        btn_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        btn_later.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+
+        dialog_start.show();
+
     }
 
 
