@@ -23,7 +23,7 @@
             <ImageView
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:src="@drawable/contact" />
+                android:src="@drawable/user" />
 
             <EditText
                 android:id="@+id/ed_email"
@@ -31,7 +31,7 @@
                 android:layout_height="50dp"
                 android:layout_marginLeft="5dp"
                 android:backgroundTint="@android:color/darker_gray"
-                android:hint="Email"
+                android:hint="User Name"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:paddingLeft="10dp"
@@ -70,6 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:text="Reset Password"
+            android:visibility="gone"
             android:textColor="@color/gray_light"
             android:textSize="18sp" />
 
@@ -103,6 +104,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/ll_form"
         android:layout_marginTop="10dp"
+        android:visibility="gone"
         android:orientation="vertical">
 
 
