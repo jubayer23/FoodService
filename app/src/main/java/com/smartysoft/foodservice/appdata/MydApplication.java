@@ -24,6 +24,7 @@ public class MydApplication extends Application {
     private static PrefManager pref;
 
     private float scale;
+
     @Override
     public void onCreate() {
         super.onCreate();

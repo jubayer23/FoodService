@@ -117,15 +117,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         }
 
         if (id == R.id.btn_submit) {
-            Log.d("DEBUG", "this is called");
             String imie = DeviceInfoUtils.getDeviceImieNumber(this);
-            Log.d("DEBUG", imie);
-            if (isValidCredentialsProvided() && imie != null && !imie.isEmpty()) {
+            String fcmId = MydApplication.getInstance().getPrefManger().getFcmRegId();
+            if (isValidCredentialsProvided() && imie != null && !imie.isEmpty() && !fcmId.isEmpty()) {
 
                 CommonMethods.hideKeyboardForcely(this, ed_email);
                 CommonMethods.hideKeyboardForcely(this, ed_password);
 
-                String fcmId = "123";
+
 
                 saveCache(ed_email.getText().toString());
 

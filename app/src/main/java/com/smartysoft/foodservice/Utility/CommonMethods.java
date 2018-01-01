@@ -14,6 +14,8 @@ import android.widget.EditText;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -156,5 +158,13 @@ public class CommonMethods {
 
         return (double) Math.round(value * 100000d) / 100000d;
 
+    }
+
+
+    /*"yyyy-MM-dd HH:mm:ss"*/
+    public static String currentDate(String format){
+        DateFormat dateFormat = new SimpleDateFormat(format);
+        Date date = new Date();
+        return  dateFormat.format(date);
     }
 }

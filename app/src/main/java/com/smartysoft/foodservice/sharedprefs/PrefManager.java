@@ -7,6 +7,7 @@ import android.content.SharedPreferences.Editor;
 
 import com.google.gson.Gson;
 import com.smartysoft.foodservice.BuildConfig;
+import com.smartysoft.foodservice.firebase.model.NotificationData;
 import com.smartysoft.foodservice.model.User;
 
 import java.lang.reflect.Type;
@@ -39,11 +40,13 @@ public class PrefManager {
     private static final String PREF_NAME = BuildConfig.APPLICATION_ID;
 
     private static final String KEY_USER = "user";
+    private static final String KEY_NOTIFICATION_DATA = "notification_data";
 
     private static final String KEY_RECEIVED_CARD_OBJ = "received_card_obj";
     private static final String KEY_FAV_SERVICE = "fav_service";
     private static final String KEY_EMAIL_CACHE = "key_email_cache";
     private static final String KEY_PETROL_ID = "patrol_id";
+    private static final String KEY_DELIVERY_RUNNING_STATUS = "delivery_running_on";
 
     private static final String KEY_USER_START_LAT = "user_start_lat";
     private static final String KEY_USER_START_LANG = "user_start_lng";
@@ -91,6 +94,32 @@ public class PrefManager {
         return GSON.fromJson(gson, User.class);
     }
 
+
+    public void setNotificationData(NotificationData obj) {
+        editor = pref.edit();
+
+        editor.putString(KEY_NOTIFICATION_DATA, GSON.toJson(obj));
+
+        // commit changes
+        editor.commit();
+    }
+
+    public void setNotificationData(String obj) {
+        editor = pref.edit();
+
+        editor.putString(KEY_NOTIFICATION_DATA, obj);
+
+        // commit changes
+        editor.commit();
+    }
+
+    public NotificationData getNotificationData() {
+
+        String gson = pref.getString(KEY_NOTIFICATION_DATA, "");
+        if (gson.isEmpty()) return null;
+        return GSON.fromJson(gson, NotificationData.class);
+    }
+
     public void setPathId(String type) {
         editor = pref.edit();
 
@@ -102,6 +131,20 @@ public class PrefManager {
     public String getPathId() {
         return pref.getString(KEY_PETROL_ID, "");
     }
+
+
+    public void setDeliveryRunningStatus(boolean type) {
+        editor = pref.edit();
+
+        editor.putBoolean(KEY_DELIVERY_RUNNING_STATUS, type);
+        // commit changes
+        editor.commit();
+    }
+    public boolean getDeliveryRunningStatus() {
+        return pref.getBoolean(KEY_DELIVERY_RUNNING_STATUS, false);
+    }
+
+
 
     public void setUserStartLat(String value) {
         editor = pref.edit();

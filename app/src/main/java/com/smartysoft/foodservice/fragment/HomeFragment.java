@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +35,7 @@ import com.smartysoft.foodservice.Utility.UserLastKnownLocation;
 import com.smartysoft.foodservice.alertbanner.AlertDialogForAnything;
 import com.smartysoft.foodservice.appdata.GlobalAppAccess;
 import com.smartysoft.foodservice.appdata.MydApplication;
+import com.smartysoft.foodservice.firebase.model.NotificationData;
 import com.smartysoft.foodservice.firebase.utils.NotificationUtils;
 import com.smartysoft.foodservice.service.GpsServiceUpdate;
 
@@ -62,7 +64,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         init(view);
 
-        if (!MydApplication.getInstance().getPrefManger().getPathId().isEmpty()) {
+        if (MydApplication.getInstance().getPrefManger().getDeliveryRunningStatus()) {
 
 
             //RESTART SERVICE
@@ -80,6 +82,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onActivityCreated(Bundle SavedInstanceState) {
         super.onActivityCreated(SavedInstanceState);
 
+        String  call_from = getArguments().getString(GlobalAppAccess.KEY_CALL_FROM);
+
+        if(call_from!=null && !call_from.isEmpty() && call_from.equals("notification")){
+            showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData());
+        }
     }
 
     @Override
@@ -121,46 +128,36 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         int id = view.getId();
 
-        LastLocationOnly lastLocationOnly = new LastLocationOnly(getActivity());
 
-        if (!lastLocationOnly.canGetLocation()) {
-            GpsEnableTool gpsEnableTool = new GpsEnableTool(getActivity());
-            gpsEnableTool.enableGPs();
-            return;
-        }
 
         if (id == R.id.btn_startpetroling) {
 
-            if (!DeviceInfoUtils.isConnectingToInternet(getActivity())) {
-                AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(), "Error", "Please connect to working internet connection!", false);
-                return;
-            }
-
-            showProgressDialog("please wait..", true, false);
-            UserLastKnownLocation.LocationResult locationResult = new UserLastKnownLocation.LocationResult() {
-                @Override
-                public void gotLocation(Location location) {
-                    final double loc_lat = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLatitude());
-                    final double loc_lng = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLongitude());
-                    //Got the location!
-                    //dismissProgressDialog();
-                    hitUrlForStartGps(GlobalAppAccess.URL_DELIVERY_BOY_LOCATION,
-                            MydApplication.getInstance().getPrefManger().getUserProfile().getId(),
-                            loc_lat, loc_lng);
+                if(MydApplication.getInstance().getPrefManger().getNotificationData() != null){
+                    showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData());
+                }else{
+                    Toast.makeText(getActivity(),"No delivery product is assigned for you!",Toast.LENGTH_LONG).show();
                 }
-            };
-            UserLastKnownLocation myLocation = new UserLastKnownLocation();
-            myLocation.getLocation(getActivity(), locationResult);
+
         }
 
 
         if (id == R.id.btn_stoppatrolling) {
+
+
+            LastLocationOnly lastLocationOnly = new LastLocationOnly(getActivity());
+
+            if (!lastLocationOnly.canGetLocation()) {
+                GpsEnableTool gpsEnableTool = new GpsEnableTool(getActivity());
+                gpsEnableTool.enableGPs();
+                return;
+            }
+
             if (!DeviceInfoUtils.isConnectingToInternet(getActivity())) {
                 AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(), "Error", "Please connect to working internet connection!", false);
                 return;
             }
 
-            if(MydApplication.getInstance().getPrefManger().getPathId().isEmpty()){
+            if(!MydApplication.getInstance().getPrefManger().getDeliveryRunningStatus()){
                 stopPatrollingSuccessUpdateUi();
                 return;
             }
@@ -215,7 +212,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         alertDialog.show();
     }
 
-    private void hitUrlForStartGps(String url, final String id, final double lat, final double lng) {
+    private void hitUrlForStartGps(String url, final String id, final String pathId, final double lat, final double lng) {
         // TODO Auto-generated method stub
 
         //showProgressDialog("Start Delivery....", true, false);
@@ -234,6 +231,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             JSONObject jsonObject = new JSONObject(response);
                             String result = jsonObject.getString("result");
                             if (result.equals("1")) {
+
+                                if(dialog_start != null && dialog_start.isShowing()){
+                                    dialog_start.dismiss();
+                                    dialog_start = null;
+                                }
+
+
+                                MydApplication.getInstance().getPrefManger().setDeliveryRunningStatus(true);
 
                                 MydApplication.getInstance().getPrefManger().setPathId(jsonObject.getString("pathId"));
 
@@ -267,6 +272,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 params.put("id", id);
                 params.put("latitude", String.valueOf(lat));
                 params.put("longitude", String.valueOf(lng));
+                params.put("startPath", "true");
+                params.put("pathId", pathId);
                 params.put("authImie", MydApplication.getInstance().getPrefManger().getUserProfile().getAuthImie());
                 return params;
             }
@@ -349,6 +356,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btn_start_petroling.setVisibility(View.VISIBLE);
         btn_stop_patrolling.setVisibility(View.GONE);
 
+        MydApplication.getInstance().getPrefManger().setDeliveryRunningStatus(false);
+        MydApplication.getInstance().getPrefManger().setNotificationData("");
         MydApplication.getInstance().getPrefManger().setPathId("");
     }
 
@@ -377,15 +386,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                 Toast.makeText(getActivity(), "Push notification: " + message, Toast.LENGTH_LONG).show();
 
-                //showNotificationDialog(title,message,address,mobile);
+                showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData());
 
                 //txtMessage.setText(message);
             }
         }
     };
 
-    private void showNotificationDialog(String title, String message, String address, String mobile) {
-        final Dialog dialog_start = new Dialog(getActivity(),
+
+    private Dialog dialog_start;
+    private void showNotificationDialog(NotificationData notificationData) {
+       dialog_start = new Dialog(getActivity(),
                 android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         dialog_start.setCancelable(true);
         dialog_start.setContentView(R.layout.dialog_notification);
@@ -396,33 +407,74 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         Button btn_later = (Button) dialog_start.findViewById(R.id.btn_later) ;
         Button btn_start = (Button) dialog_start.findViewById(R.id.btn_start);
 
+        final ImageView img_close = (ImageView) dialog_start.findViewById(R.id.img_close_dialog);
 
 
 
-        tv_description.setText(message);
 
-        tv_address.setText(address);
+        tv_description.setText(notificationData.getData().getMessage());
 
-        tv_mobile.setText(mobile);
+        tv_address.setText(notificationData.getData().getAddress());
+
+        tv_mobile.setText(notificationData.getData().getMobile());
 
 
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                startDelivery();
             }
         });
 
         btn_later.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                dialog_start.dismiss();
+            }
+        });
 
+        img_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog_start.dismiss();
             }
         });
 
 
         dialog_start.show();
 
+    }
+
+    private void startDelivery(){
+        LastLocationOnly lastLocationOnly = new LastLocationOnly(getActivity());
+
+        if (!lastLocationOnly.canGetLocation()) {
+            GpsEnableTool gpsEnableTool = new GpsEnableTool(getActivity());
+            gpsEnableTool.enableGPs();
+            return;
+        }
+
+        if (!DeviceInfoUtils.isConnectingToInternet(getActivity())) {
+            AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(), "Error", "Please connect to working internet connection!", false);
+            return;
+        }
+
+        showProgressDialog("please wait..", true, false);
+        UserLastKnownLocation.LocationResult locationResult = new UserLastKnownLocation.LocationResult() {
+            @Override
+            public void gotLocation(Location location) {
+                final double loc_lat = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLatitude());
+                final double loc_lng = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLongitude());
+                //Got the location!
+                //dismissProgressDialog();
+                hitUrlForStartGps(GlobalAppAccess.URL_DELIVERY_BOY_LOCATION,
+                        MydApplication.getInstance().getPrefManger().getUserProfile().getId(),
+                        MydApplication.getInstance().getPrefManger().getNotificationData().getData().getPathId(),
+                        loc_lat, loc_lng);
+            }
+        };
+        UserLastKnownLocation myLocation = new UserLastKnownLocation();
+        myLocation.getLocation(getActivity(), locationResult);
     }
 
 

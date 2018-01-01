@@ -9,7 +9,10 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.smartysoft.foodservice.HomeActivity;
+import com.smartysoft.foodservice.Utility.CommonMethods;
 import com.smartysoft.foodservice.appdata.GlobalAppAccess;
+import com.smartysoft.foodservice.appdata.MydApplication;
+import com.smartysoft.foodservice.firebase.model.NotificationData;
 import com.smartysoft.foodservice.firebase.utils.NotificationUtils;
 
 import org.json.JSONException;
@@ -21,7 +24,7 @@ import org.json.JSONObject;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String TAG = MyFirebaseMessagingService.class.getSimpleName();
+    private static final String TAG = "DEBUG";
 
     private NotificationUtils notificationUtils;
 
@@ -42,9 +45,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Log.e(TAG, "Data Payload: " + remoteMessage.getData().toString());
 
+
             try {
-                JSONObject json = new JSONObject(remoteMessage.getData().toString());
-                handleDataMessage(json);
+                //JSONObject json = new JSONObject(remoteMessage.getData().toString());
+                //handleDataMessage(json);
+                NotificationData notificationData = MydApplication.gson.fromJson(remoteMessage.getData().toString(), NotificationData.class);
+                handleDataMessage(notificationData);
             } catch (Exception e) {
                 Log.e(TAG, "Exception: " + e.getMessage());
             }
@@ -66,26 +72,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void handleDataMessage(JSONObject json) {
-        Log.e(TAG, "push json: " + json.toString());
+    private void handleDataMessage(NotificationData notificationData) {
+       //Log.e(TAG, "push json: " + json.toString());
 
+        MydApplication.getInstance().getPrefManger().setNotificationData(notificationData);
+
+
+        String title = notificationData.getData().getTitle();
+        String message = notificationData.getData().getMessage();
+        String timestamp = CommonMethods.currentDate("yyyy-MM-dd HH:mm:ss");
+        String imageUrl = notificationData.getData().getImageUrl();
         try {
-            JSONObject data = json.getJSONObject("data");
-
-            String title = data.getString("title");
-            String message = data.getString("message");
-            boolean isBackground = data.getBoolean("is_background");
-            String imageUrl = data.getString("image");
-            String timestamp = data.getString("timestamp");
-            JSONObject payload = data.getJSONObject("payload");
-
-            Log.e(TAG, "title: " + title);
-            Log.e(TAG, "message: " + message);
-            Log.e(TAG, "isBackground: " + isBackground);
-            Log.e(TAG, "payload: " + payload.toString());
-            Log.e(TAG, "imageUrl: " + imageUrl);
-            Log.e(TAG, "timestamp: " + timestamp);
-
 
             if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
                 // app is in foreground, broadcast the push message
@@ -103,15 +100,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 resultIntent.putExtra("message", message);
 
                 // check for image attachment
-                if (TextUtils.isEmpty(imageUrl)) {
+                if (imageUrl != null && TextUtils.isEmpty(imageUrl)) {
                     showNotificationMessage(getApplicationContext(), title, message, timestamp, resultIntent);
                 } else {
                     // image is present, show notification with image
                     showNotificationMessageWithBigImage(getApplicationContext(), title, message, timestamp, resultIntent, imageUrl);
                 }
             }
-        } catch (JSONException e) {
-            Log.e(TAG, "Json Exception: " + e.getMessage());
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e.getMessage());
         }

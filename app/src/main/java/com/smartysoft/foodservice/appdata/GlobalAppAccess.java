@@ -4,7 +4,8 @@ package com.smartysoft.foodservice.appdata;
 
 public class GlobalAppAccess {
 
-    public static String BaseUrl = "https://21ab35ee.ngrok.io/tajashop/";
+
+    public static String BaseUrl = "https://c941db84.ngrok.io/tajashop/";
     //public static String BaseUrl = "https://b5e99a4d.ngrok.io/bgb/";
     public static final String URL_LOGIN = BaseUrl +   "deliveryBoyLogin";
     public static final String URL_DELIVERY_BOY_LOCATION = BaseUrl +  "updateDeliveryBoyLocation";
@@ -26,5 +27,7 @@ public class GlobalAppAccess {
     public static final int NOTIFICATION_ID = 100;
     public static final int NOTIFICATION_ID_BIG_IMAGE = 101;
 
+
+    public static final String KEY_CALL_FROM = "call_from";
 
 }
