@@ -276,6 +276,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                                 startPatrollingSuccessUpdateUi(notificationData);
 
+                                notificationAdapter.notifyDataSetChanged();
+
                             } else {
                                 AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(),
                                         "Error", response, false);
@@ -405,6 +407,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     notificationDatas.remove(count);
                     MydApplication.getInstance().getPrefManger().setNotificationDatas(notificationDatas);
                     notificationAdapter.notifyDataSetChanged();
+                    break;
                 }
                 count++;
             }
@@ -413,6 +416,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         MydApplication.getInstance().getPrefManger().setCurrentlyRunningDelivery("");
         MydApplication.getInstance().getPrefManger().setNotificationData("");
         MydApplication.getInstance().getPrefManger().setPathId("");
+
+
+        if(dialog_start != null && dialog_start.isShowing()){
+            dialog_start.dismiss();
+        }
     }
 
     BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
@@ -441,6 +449,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                // Toast.makeText(getActivity(), "Push notification: " + message, Toast.LENGTH_LONG).show();
 
                 showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData(),false);
+                notificationDatas.add(MydApplication.getInstance().getPrefManger().getNotificationData());
+                notificationAdapter.notifyDataSetChanged();
 
                 //txtMessage.setText(message);
             }
@@ -450,6 +460,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private Dialog dialog_start;
     private void showNotificationDialog(final NotificationData notificationData, boolean isDeliveryAlreadyRunning) {
+        if(dialog_start != null && dialog_start.isShowing()){
+            dialog_start.dismiss();
+        }
        dialog_start = new Dialog(getActivity(),
                 android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         dialog_start.setCancelable(true);
