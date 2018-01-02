@@ -67,10 +67,20 @@
 
 
         <LinearLayout
+            android:id="@+id/ll_container_control_panel"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_stop"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/btn_selector_gray_round"
+                android:text="Delivery completed"
+                android:textColor="@color/white"/>
 
             <Button
                 android:id="@+id/btn_later"

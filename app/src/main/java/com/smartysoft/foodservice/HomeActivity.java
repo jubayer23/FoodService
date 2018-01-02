@@ -9,11 +9,13 @@ import com.smartysoft.foodservice.Utility.GpsEnableTool;
 import com.smartysoft.foodservice.Utility.LastLocationOnly;
 import com.smartysoft.foodservice.appdata.GlobalAppAccess;
 import com.smartysoft.foodservice.appdata.MydApplication;
+import com.smartysoft.foodservice.firebase.service.MyFirebaseMessagingService;
 import com.smartysoft.foodservice.fragment.HomeFragment;
 
 public class HomeActivity extends BaseActivity {
 
     private static final String TAG_HOME_FRAGMENT = "home_fragment";
+    public static final String TAG_HOME_ACTIVITY = "home_activity";
 
     private HomeFragment homeFragment;
     @Override
@@ -41,10 +43,11 @@ public class HomeActivity extends BaseActivity {
 
             homeFragment = new HomeFragment();
             Bundle arguments = new Bundle();
-            if(call_from != null && call_from.equalsIgnoreCase("notification")){
-                arguments.putString(GlobalAppAccess.KEY_CALL_FROM, "notification");
+            if(call_from != null && call_from.equalsIgnoreCase(MyFirebaseMessagingService.TAG_NOTIFICATION)){
+                arguments.putString(GlobalAppAccess.KEY_CALL_FROM, MyFirebaseMessagingService.TAG_NOTIFICATION);
+                arguments.putString(GlobalAppAccess.KEY_NOTIFICATION_ID, getIntent().getStringExtra(GlobalAppAccess.KEY_NOTIFICATION_ID));
             }else{
-                arguments.putString(GlobalAppAccess.KEY_CALL_FROM, "main");
+                arguments.putString(GlobalAppAccess.KEY_CALL_FROM, TAG_HOME_ACTIVITY);
             }
             homeFragment.setArguments(arguments);
             FragmentTransaction transaction = getSupportFragmentManager()

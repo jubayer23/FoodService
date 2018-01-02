@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.smartysoft.foodservice.BuildConfig;
 import com.smartysoft.foodservice.firebase.model.NotificationData;
 import com.smartysoft.foodservice.model.User;
@@ -41,6 +42,8 @@ public class PrefManager {
 
     private static final String KEY_USER = "user";
     private static final String KEY_NOTIFICATION_DATA = "notification_data";
+    private static final String KEY_RUNNING_DELIVERY = "running_delivery";
+    private static final String KEY_NOTIFICATION_DATAs = "notification_data_s";
 
     private static final String KEY_RECEIVED_CARD_OBJ = "received_card_obj";
     private static final String KEY_FAV_SERVICE = "fav_service";
@@ -120,6 +123,31 @@ public class PrefManager {
         return GSON.fromJson(gson, NotificationData.class);
     }
 
+    public void setCurrentlyRunningDelivery(NotificationData obj) {
+        editor = pref.edit();
+
+        editor.putString(KEY_RUNNING_DELIVERY, GSON.toJson(obj));
+
+        // commit changes
+        editor.commit();
+    }
+
+    public void setCurrentlyRunningDelivery(String obj) {
+        editor = pref.edit();
+
+        editor.putString(KEY_RUNNING_DELIVERY, obj);
+
+        // commit changes
+        editor.commit();
+    }
+
+    public NotificationData getCurrentlyRunningDelivery() {
+
+        String gson = pref.getString(KEY_RUNNING_DELIVERY, "");
+        if (gson.isEmpty()) return null;
+        return GSON.fromJson(gson, NotificationData.class);
+    }
+
     public void setPathId(String type) {
         editor = pref.edit();
 
@@ -130,18 +158,6 @@ public class PrefManager {
 
     public String getPathId() {
         return pref.getString(KEY_PETROL_ID, "");
-    }
-
-
-    public void setDeliveryRunningStatus(boolean type) {
-        editor = pref.edit();
-
-        editor.putBoolean(KEY_DELIVERY_RUNNING_STATUS, type);
-        // commit changes
-        editor.commit();
-    }
-    public boolean getDeliveryRunningStatus() {
-        return pref.getBoolean(KEY_DELIVERY_RUNNING_STATUS, false);
     }
 
 
@@ -177,4 +193,40 @@ public class PrefManager {
     public String getFcmRegId() {
         return pref.getString(KEY_FCM_REG_ID,"");
     }
+
+
+    public void setNotificationDatas(List<NotificationData> obj) {
+        editor = pref.edit();
+
+        editor.putString(KEY_NOTIFICATION_DATAs, GSON.toJson(obj));
+
+        // commit changes
+        editor.commit();
+    }
+
+    public void setNotificationDatas(String obj) {
+        editor = pref.edit();
+
+        editor.putString(KEY_NOTIFICATION_DATAs, obj);
+
+        // commit changes
+        editor.commit();
+    }
+
+
+    public List<NotificationData> getNotificationDatas() {
+
+        List<NotificationData> productFromShared = new ArrayList<>();
+
+        String gson = pref.getString(KEY_NOTIFICATION_DATAs, "");
+
+        if (gson.isEmpty()) return productFromShared;
+
+        Type type = new TypeToken<List<NotificationData>>() {
+        }.getType();
+        productFromShared = GSON.fromJson(gson, type);
+
+        return productFromShared;
+    }
+
 }

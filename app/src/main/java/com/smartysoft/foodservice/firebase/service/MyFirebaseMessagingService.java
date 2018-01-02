@@ -18,6 +18,8 @@ import com.smartysoft.foodservice.firebase.utils.NotificationUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
 /**
  * Created by jubayer on 1/1/2018.
  */
@@ -25,6 +27,7 @@ import org.json.JSONObject;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "DEBUG";
+    public static final String TAG_NOTIFICATION = "notification";
 
     private NotificationUtils notificationUtils;
 
@@ -77,6 +80,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         MydApplication.getInstance().getPrefManger().setNotificationData(notificationData);
 
+        List<NotificationData> notificationDatas = MydApplication.getInstance().getPrefManger().getNotificationDatas();
+        notificationDatas.add(notificationData);
+        MydApplication.getInstance().getPrefManger().setNotificationDatas(notificationDatas);
+
 
         String title = notificationData.getData().getTitle();
         String message = notificationData.getData().getMessage();
@@ -87,7 +94,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
                 // app is in foreground, broadcast the push message
                 Intent pushNotification = new Intent(GlobalAppAccess.PUSH_NOTIFICATION);
-                pushNotification.putExtra("message", message);
+                pushNotification.putExtra(GlobalAppAccess.KEY_NOTIFICATION_ID,notificationData.getData().getPathId());
                 LocalBroadcastManager.getInstance(this).sendBroadcast(pushNotification);
 
                 // play notification sound
@@ -96,8 +103,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             } else {
                 // app is in background, show the notification in notification tray
                 Intent resultIntent = new Intent(getApplicationContext(), HomeActivity.class);
-                resultIntent.putExtra("call_from","notification");
-                resultIntent.putExtra("message", message);
+                resultIntent.putExtra(GlobalAppAccess.KEY_CALL_FROM, TAG_NOTIFICATION);
+                resultIntent.putExtra(GlobalAppAccess.KEY_NOTIFICATION_ID,notificationData.getData().getPathId());
 
                 // check for image attachment
                 if (imageUrl != null && TextUtils.isEmpty(imageUrl)) {

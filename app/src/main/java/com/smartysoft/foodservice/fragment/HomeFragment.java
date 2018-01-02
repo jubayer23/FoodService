@@ -12,12 +12,16 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,17 +36,22 @@ import com.smartysoft.foodservice.Utility.DeviceInfoUtils;
 import com.smartysoft.foodservice.Utility.GpsEnableTool;
 import com.smartysoft.foodservice.Utility.LastLocationOnly;
 import com.smartysoft.foodservice.Utility.UserLastKnownLocation;
+import com.smartysoft.foodservice.adapter.NotificationAdapter;
 import com.smartysoft.foodservice.alertbanner.AlertDialogForAnything;
 import com.smartysoft.foodservice.appdata.GlobalAppAccess;
 import com.smartysoft.foodservice.appdata.MydApplication;
+import com.smartysoft.foodservice.customView.RecyclerItemClickListener;
 import com.smartysoft.foodservice.firebase.model.NotificationData;
+import com.smartysoft.foodservice.firebase.service.MyFirebaseMessagingService;
 import com.smartysoft.foodservice.firebase.utils.NotificationUtils;
 import com.smartysoft.foodservice.service.GpsServiceUpdate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,7 +62,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG_REQUEST_HOME_PAGE = "tag_volley_request_in_home_page";
 
-    private Button btn_start_petroling, btn_stop_patrolling;
+    private Button  btn_stop_patrolling;
+
+    private RecyclerView recyclerView;
+    private NotificationAdapter notificationAdapter;
+    private List<NotificationData> notificationDatas = new ArrayList<>();
+
+
+    private ImageView img_more;
+    private TextView tv_title, tv_name;
+
+    private LinearLayout ll_container_delivery_progress;
 
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -64,15 +83,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         init(view);
 
-        if (MydApplication.getInstance().getPrefManger().getDeliveryRunningStatus()) {
+        initAdapter();
 
+        if (MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() != null) {
 
-            //RESTART SERVICE
-            getActivity().stopService(new Intent(getActivity(), GpsServiceUpdate.class));
-            getActivity().startService(new Intent(getActivity(), GpsServiceUpdate.class));
-
-            btn_stop_patrolling.setVisibility(View.VISIBLE);
-            btn_start_petroling.setVisibility(View.GONE);
+            startPatrollingSuccessUpdateUi(MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery());
         }
 
         return view;
@@ -84,8 +99,17 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         String  call_from = getArguments().getString(GlobalAppAccess.KEY_CALL_FROM);
 
-        if(call_from!=null && !call_from.isEmpty() && call_from.equals("notification")){
-            showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData());
+        if(call_from!=null && !call_from.isEmpty() && call_from.equals(MyFirebaseMessagingService.TAG_NOTIFICATION)){
+            String notification_id = getArguments().getString(GlobalAppAccess.KEY_NOTIFICATION_ID);
+
+            List<NotificationData> notificationDatas = MydApplication.getInstance().getPrefManger().getNotificationDatas();
+            for(NotificationData notificationData : notificationDatas){
+                if(notificationData.getData().getPathId().equals(notification_id)){
+                    showNotificationDialog(notificationData, false);
+                    break;
+                }
+            }
+
         }
     }
 
@@ -114,14 +138,42 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private void init(View view) {
 
-        btn_start_petroling = (Button) view.findViewById(R.id.btn_startpetroling);
-        btn_start_petroling.setOnClickListener(this);
+
         btn_stop_patrolling = (Button) view.findViewById(R.id.btn_stoppatrolling);
         btn_stop_patrolling.setOnClickListener(this);
 
+        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+
+        img_more = (ImageView) view.findViewById(R.id.img_more);
+
+        tv_title = (TextView) view.findViewById(R.id.tv_title);
+        tv_name = (TextView) view.findViewById(R.id.tv_name);
+
+
+        ll_container_delivery_progress = (LinearLayout) view.findViewById(R.id.ll_container_delivery_progress);
+        ll_container_delivery_progress.setVisibility(View.GONE);
 
     }
 
+    private void initAdapter() {
+        notificationDatas.addAll(MydApplication.getInstance().getPrefManger().getNotificationDatas());
+
+        notificationAdapter = new NotificationAdapter(getActivity(), notificationDatas);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(notificationAdapter);
+
+        recyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override public void onItemClick(View view, int position) {
+                        // TODO Handle item click
+
+                        showNotificationDialog(notificationDatas.get(position),false);
+                    }
+                })
+        );
+    }
 
     @Override
     public void onClick(View view) {
@@ -130,7 +182,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
 
-        if (id == R.id.btn_startpetroling) {
+       /* if (id == R.id.btn_startpetroling) {
 
                 if(MydApplication.getInstance().getPrefManger().getNotificationData() != null){
                     showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData());
@@ -138,31 +190,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     Toast.makeText(getActivity(),"No delivery product is assigned for you!",Toast.LENGTH_LONG).show();
                 }
 
-        }
+        }*/
 
 
         if (id == R.id.btn_stoppatrolling) {
-
-
-            LastLocationOnly lastLocationOnly = new LastLocationOnly(getActivity());
-
-            if (!lastLocationOnly.canGetLocation()) {
-                GpsEnableTool gpsEnableTool = new GpsEnableTool(getActivity());
-                gpsEnableTool.enableGPs();
-                return;
-            }
-
-            if (!DeviceInfoUtils.isConnectingToInternet(getActivity())) {
-                AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(), "Error", "Please connect to working internet connection!", false);
-                return;
-            }
-
-            if(!MydApplication.getInstance().getPrefManger().getDeliveryRunningStatus()){
-                stopPatrollingSuccessUpdateUi();
-                return;
-            }
-
-            showStopPatrolingAlertDialog();
+            stopDelivery();
         }
 
     }
@@ -212,7 +244,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         alertDialog.show();
     }
 
-    private void hitUrlForStartGps(String url, final String id, final String pathId, final double lat, final double lng) {
+    private void hitUrlForStartGps(String url, final String id, final NotificationData notificationData, final double lat, final double lng) {
         // TODO Auto-generated method stub
 
         //showProgressDialog("Start Delivery....", true, false);
@@ -238,11 +270,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 }
 
 
-                                MydApplication.getInstance().getPrefManger().setDeliveryRunningStatus(true);
+                                MydApplication.getInstance().getPrefManger().setCurrentlyRunningDelivery(notificationData);
 
                                 MydApplication.getInstance().getPrefManger().setPathId(jsonObject.getString("pathId"));
 
-                                startPatrollingSuccessUpdateUi();
+                                startPatrollingSuccessUpdateUi(notificationData);
 
                             } else {
                                 AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(),
@@ -273,7 +305,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 params.put("latitude", String.valueOf(lat));
                 params.put("longitude", String.valueOf(lng));
                 params.put("startPath", "true");
-                params.put("pathId", pathId);
+                params.put("pathId", notificationData.getData().getPathId());
                 params.put("authImie", MydApplication.getInstance().getPrefManger().getUserProfile().getAuthImie());
                 return params;
             }
@@ -302,7 +334,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             String result = jsonObject.getString("result");
                             if (result.equals("1")) {
 
-                                stopPatrollingSuccessUpdateUi();
+                                stopPatrollingSuccessUpdateUi(MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery());
                             } else {
                                 AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(), "Alert", "There is something wrong when stop patrolling", false);
                             }
@@ -339,24 +371,46 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         MydApplication.getInstance().addToRequestQueue(req,TAG_REQUEST_HOME_PAGE);
     }
 
-    private void startPatrollingSuccessUpdateUi() {
+    private void startPatrollingSuccessUpdateUi(final NotificationData notificationData) {
 
         //RESTART SERVICE
         getActivity().stopService(new Intent(getActivity(), GpsServiceUpdate.class));
         getActivity().startService(new Intent(getActivity(), GpsServiceUpdate.class));
 
-        btn_stop_patrolling.setVisibility(View.VISIBLE);
-        btn_start_petroling.setVisibility(View.GONE);
+
+        ll_container_delivery_progress.setVisibility(View.VISIBLE);
+        tv_title.setText(notificationData.getData().getTitle());
+        tv_name.setText(notificationData.getData().getName());
+
+
+        img_more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showNotificationDialog(notificationData, true);
+            }
+        });
+
         // Log.d("DEBUG",String.valueOf(error));
     }
 
-    private void stopPatrollingSuccessUpdateUi() {
+    private void stopPatrollingSuccessUpdateUi(NotificationData notificationData) {
         getActivity().stopService(new Intent(getActivity(), GpsServiceUpdate.class));
 
-        btn_start_petroling.setVisibility(View.VISIBLE);
-        btn_stop_patrolling.setVisibility(View.GONE);
+        ll_container_delivery_progress.setVisibility(View.GONE);
 
-        MydApplication.getInstance().getPrefManger().setDeliveryRunningStatus(false);
+        if(notificationData != null){
+            int count = 0;
+            for(NotificationData notificationData1: notificationDatas){
+                if(notificationData.getData().getPathId().equals(notificationData1.getData().getPathId())){
+                    notificationDatas.remove(count);
+                    MydApplication.getInstance().getPrefManger().setNotificationDatas(notificationDatas);
+                    notificationAdapter.notifyDataSetChanged();
+                }
+                count++;
+            }
+        }
+
+        MydApplication.getInstance().getPrefManger().setCurrentlyRunningDelivery("");
         MydApplication.getInstance().getPrefManger().setNotificationData("");
         MydApplication.getInstance().getPrefManger().setPathId("");
     }
@@ -379,14 +433,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 // new push notification is received
 
                // String title = intent.getStringExtra("title");
-                String message = intent.getStringExtra("message");
+               // String message = intent.getStringExtra("message");
                // String address = intent.getStringExtra("address");
                // String mobile = intent.getStringExtra("mobile");
 
 
-                Toast.makeText(getActivity(), "Push notification: " + message, Toast.LENGTH_LONG).show();
+               // Toast.makeText(getActivity(), "Push notification: " + message, Toast.LENGTH_LONG).show();
 
-                showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData());
+                showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData(),false);
 
                 //txtMessage.setText(message);
             }
@@ -395,7 +449,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
     private Dialog dialog_start;
-    private void showNotificationDialog(NotificationData notificationData) {
+    private void showNotificationDialog(final NotificationData notificationData, boolean isDeliveryAlreadyRunning) {
        dialog_start = new Dialog(getActivity(),
                 android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         dialog_start.setCancelable(true);
@@ -406,10 +460,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         TextView tv_mobile = (TextView) dialog_start.findViewById(R.id.tv_mobile);
         Button btn_later = (Button) dialog_start.findViewById(R.id.btn_later) ;
         Button btn_start = (Button) dialog_start.findViewById(R.id.btn_start);
+        Button btn_stop = (Button) dialog_start.findViewById(R.id.btn_stop);
 
         final ImageView img_close = (ImageView) dialog_start.findViewById(R.id.img_close_dialog);
 
 
+        if(isDeliveryAlreadyRunning){
+            btn_stop.setVisibility(View.VISIBLE);
+            btn_later.setVisibility(View.GONE);
+            btn_start.setVisibility(View.GONE);
+        }else{
+            btn_stop.setVisibility(View.GONE);
+            btn_later.setVisibility(View.VISIBLE);
+            btn_start.setVisibility(View.VISIBLE);
+        }
 
 
         tv_description.setText(notificationData.getData().getMessage());
@@ -422,7 +486,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startDelivery();
+                startDelivery(notificationData);
             }
         });
 
@@ -430,6 +494,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onClick(View view) {
                 dialog_start.dismiss();
+            }
+        });
+
+        btn_stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopDelivery();
             }
         });
 
@@ -445,7 +516,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    private void startDelivery(){
+    private void startDelivery(final NotificationData notificationData){
+        if(MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() != null){
+            Toast.makeText(getActivity(),"You cannot start another delivery when you have another delivery running on.",Toast.LENGTH_LONG).show();
+            return;
+        }
+
+
         LastLocationOnly lastLocationOnly = new LastLocationOnly(getActivity());
 
         if (!lastLocationOnly.canGetLocation()) {
@@ -469,12 +546,34 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 //dismissProgressDialog();
                 hitUrlForStartGps(GlobalAppAccess.URL_DELIVERY_BOY_LOCATION,
                         MydApplication.getInstance().getPrefManger().getUserProfile().getId(),
-                        MydApplication.getInstance().getPrefManger().getNotificationData().getData().getPathId(),
+                        notificationData,
                         loc_lat, loc_lng);
             }
         };
         UserLastKnownLocation myLocation = new UserLastKnownLocation();
         myLocation.getLocation(getActivity(), locationResult);
+    }
+
+    private void stopDelivery(){
+        LastLocationOnly lastLocationOnly = new LastLocationOnly(getActivity());
+
+        if (!lastLocationOnly.canGetLocation()) {
+            GpsEnableTool gpsEnableTool = new GpsEnableTool(getActivity());
+            gpsEnableTool.enableGPs();
+            return;
+        }
+
+        if (!DeviceInfoUtils.isConnectingToInternet(getActivity())) {
+            AlertDialogForAnything.showAlertDialogWhenComplte(getActivity(), "Error", "Please connect to working internet connection!", false);
+            return;
+        }
+
+        if(MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() == null){
+            stopPatrollingSuccessUpdateUi(null);
+            return;
+        }
+
+        showStopPatrolingAlertDialog();
     }
 
 
