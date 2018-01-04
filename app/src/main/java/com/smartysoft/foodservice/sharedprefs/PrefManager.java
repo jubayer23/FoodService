@@ -98,30 +98,7 @@ public class PrefManager {
     }
 
 
-    public void setNotificationData(NotificationData obj) {
-        editor = pref.edit();
 
-        editor.putString(KEY_NOTIFICATION_DATA, GSON.toJson(obj));
-
-        // commit changes
-        editor.commit();
-    }
-
-    public void setNotificationData(String obj) {
-        editor = pref.edit();
-
-        editor.putString(KEY_NOTIFICATION_DATA, obj);
-
-        // commit changes
-        editor.commit();
-    }
-
-    public NotificationData getNotificationData() {
-
-        String gson = pref.getString(KEY_NOTIFICATION_DATA, "");
-        if (gson.isEmpty()) return null;
-        return GSON.fromJson(gson, NotificationData.class);
-    }
 
     public void setCurrentlyRunningDelivery(NotificationData obj) {
         editor = pref.edit();

@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
     private ImageView img_more;
-    private TextView tv_title, tv_name;
+    private TextView tv_title, tv_name, tv_no_delivery_alert;
 
     private LinearLayout ll_container_delivery_progress;
 
@@ -84,6 +84,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         init(view);
 
         initAdapter();
+
+        updateUiIfThereIsNoDelivery();
 
         if (MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() != null) {
 
@@ -153,6 +155,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         ll_container_delivery_progress = (LinearLayout) view.findViewById(R.id.ll_container_delivery_progress);
         ll_container_delivery_progress.setVisibility(View.GONE);
 
+        tv_no_delivery_alert = (TextView) view.findViewById(R.id.tv_no_delivery_alert);
+        tv_no_delivery_alert.setVisibility(View.GONE);
+
     }
 
     private void initAdapter() {
@@ -173,6 +178,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     }
                 })
         );
+    }
+
+    private void updateUiIfThereIsNoDelivery(){
+        if(notificationDatas.isEmpty()){
+            tv_no_delivery_alert.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        }else{
+            tv_no_delivery_alert.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -414,13 +429,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
 
         MydApplication.getInstance().getPrefManger().setCurrentlyRunningDelivery("");
-        MydApplication.getInstance().getPrefManger().setNotificationData("");
         MydApplication.getInstance().getPrefManger().setPathId("");
 
 
         if(dialog_start != null && dialog_start.isShowing()){
             dialog_start.dismiss();
         }
+
+        updateUiIfThereIsNoDelivery();
     }
 
     BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
@@ -447,10 +463,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
                // Toast.makeText(getActivity(), "Push notification: " + message, Toast.LENGTH_LONG).show();
+                List<NotificationData> tempNotificationDataList = MydApplication.getInstance().getPrefManger().getNotificationDatas();
+                NotificationData latestNotification = tempNotificationDataList.get(tempNotificationDataList.size() - 1);
 
-                showNotificationDialog(MydApplication.getInstance().getPrefManger().getNotificationData(),false);
-                notificationDatas.add(MydApplication.getInstance().getPrefManger().getNotificationData());
+                showNotificationDialog(latestNotification,false);
+                notificationDatas.add(latestNotification);
                 notificationAdapter.notifyDataSetChanged();
+                updateUiIfThereIsNoDelivery();
 
                 //txtMessage.setText(message);
             }
@@ -468,9 +487,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         dialog_start.setCancelable(true);
         dialog_start.setContentView(R.layout.dialog_notification);
 
-        TextView tv_description = (TextView) dialog_start.findViewById(R.id.tv_description);
-        TextView tv_address = (TextView) dialog_start.findViewById(R.id.tv_address);
+        TextView tv_title = (TextView) dialog_start.findViewById(R.id.tv_title);
+        TextView tv_message = (TextView) dialog_start.findViewById(R.id.tv_message);
+        TextView tv_products = (TextView) dialog_start.findViewById(R.id.tv_products);
+        TextView tv_grand_total = (TextView) dialog_start.findViewById(R.id.tv_grand_total);
+        TextView tv_deadline = (TextView) dialog_start.findViewById(R.id.tv_deadline);
+        TextView tv_name = (TextView) dialog_start.findViewById(R.id.tv_name);
         TextView tv_mobile = (TextView) dialog_start.findViewById(R.id.tv_mobile);
+        TextView tv_address = (TextView) dialog_start.findViewById(R.id.tv_address);
+        TextView tv_status = (TextView) dialog_start.findViewById(R.id.tv_status);
+
         Button btn_later = (Button) dialog_start.findViewById(R.id.btn_later) ;
         Button btn_start = (Button) dialog_start.findViewById(R.id.btn_start);
         Button btn_stop = (Button) dialog_start.findViewById(R.id.btn_stop);
@@ -482,18 +508,27 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             btn_stop.setVisibility(View.VISIBLE);
             btn_later.setVisibility(View.GONE);
             btn_start.setVisibility(View.GONE);
+            tv_status.setText("On progress");
+            tv_status.setTextColor(getActivity().getResources().getColor(R.color.green));
         }else{
             btn_stop.setVisibility(View.GONE);
             btn_later.setVisibility(View.VISIBLE);
             btn_start.setVisibility(View.VISIBLE);
+            tv_status.setText("Pending");
+            tv_status.setTextColor(getActivity().getResources().getColor(R.color.orange));
         }
 
 
-        tv_description.setText(notificationData.getData().getMessage());
-
+        tv_message.setText(notificationData.getData().getMessage());
+        tv_title.setText(notificationData.getData().getTitle());
+        tv_products.setText(notificationData.getData().getProducts());
+        tv_grand_total.setText(notificationData.getData().getGrandTotal());
+        tv_deadline.setText(notificationData.getData().getDeadline());
+        tv_name.setText(notificationData.getData().getName());
+        tv_mobile.setText(notificationData.getData().getMobile());
         tv_address.setText(notificationData.getData().getAddress());
 
-        tv_mobile.setText(notificationData.getData().getMobile());
+
 
 
         btn_start.setOnClickListener(new View.OnClickListener() {
@@ -531,7 +566,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private void startDelivery(final NotificationData notificationData){
         if(MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() != null){
-            Toast.makeText(getActivity(),"You cannot start another delivery when you have another delivery running on.",Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(),"You cannot start another delivery when you have a delivery already running on.",Toast.LENGTH_LONG).show();
             return;
         }
 

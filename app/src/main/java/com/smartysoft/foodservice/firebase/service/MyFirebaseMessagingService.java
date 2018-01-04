@@ -81,7 +81,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void handleDataMessage(NotificationData notificationData) {
        //Log.e(TAG, "push json: " + json.toString());
 
-        MydApplication.getInstance().getPrefManger().setNotificationData(notificationData);
 
         List<NotificationData> notificationDatas = MydApplication.getInstance().getPrefManger().getNotificationDatas();
         notificationDatas.add(notificationData);
