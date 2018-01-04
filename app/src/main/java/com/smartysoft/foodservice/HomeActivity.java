@@ -44,8 +44,10 @@ public class HomeActivity extends BaseActivity {
             homeFragment = new HomeFragment();
             Bundle arguments = new Bundle();
             if(call_from != null && call_from.equalsIgnoreCase(MyFirebaseMessagingService.TAG_NOTIFICATION)){
+
                 arguments.putString(GlobalAppAccess.KEY_CALL_FROM, MyFirebaseMessagingService.TAG_NOTIFICATION);
                 arguments.putString(GlobalAppAccess.KEY_NOTIFICATION_ID, getIntent().getStringExtra(GlobalAppAccess.KEY_NOTIFICATION_ID));
+
             }else{
                 arguments.putString(GlobalAppAccess.KEY_CALL_FROM, TAG_HOME_ACTIVITY);
             }

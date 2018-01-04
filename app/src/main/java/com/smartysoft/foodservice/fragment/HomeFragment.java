@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
     private ImageView img_more;
-    private TextView tv_title, tv_name, tv_no_delivery_alert;
+    private TextView tv_title, tv_name,tv_deadline, tv_no_delivery_alert;
 
     private LinearLayout ll_container_delivery_progress;
 
@@ -150,6 +150,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         tv_title = (TextView) view.findViewById(R.id.tv_title);
         tv_name = (TextView) view.findViewById(R.id.tv_name);
+        tv_deadline = (TextView) view.findViewById(R.id.tv_deadline);
 
 
         ll_container_delivery_progress = (LinearLayout) view.findViewById(R.id.ll_container_delivery_progress);
@@ -398,6 +399,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         ll_container_delivery_progress.setVisibility(View.VISIBLE);
         tv_title.setText(notificationData.getData().getTitle());
         tv_name.setText(notificationData.getData().getName());
+        tv_deadline.setText(notificationData.getData().getDeadline());
 
 
         img_more.setOnClickListener(new View.OnClickListener() {
