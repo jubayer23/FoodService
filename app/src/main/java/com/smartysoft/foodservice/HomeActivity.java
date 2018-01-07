@@ -1,9 +1,12 @@
 package com.smartysoft.foodservice;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.smartysoft.foodservice.Utility.GpsEnableTool;
 import com.smartysoft.foodservice.Utility.LastLocationOnly;
@@ -68,5 +71,35 @@ public class HomeActivity extends BaseActivity {
             gpsEnableTool.enableGPs();
             return;
         }
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        //Do you custom menu work above this comment
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_logout) {
+            //MydApplication.getInstance().getPrefManger().setUserProfile("");
+            //Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            //startActivity(intent);
+            //finish();
+            processLogout();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void processLogout(){
+        MydApplication.getInstance().getPrefManger().setUserProfile("");
+
+        startActivity(new Intent(HomeActivity.this,MainActivity.class));
+        finish();
     }
 }
