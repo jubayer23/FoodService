@@ -444,7 +444,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         /** we dont need below code as we already remove notification data while we
          * starting the delivery
          * */
-        
+
        /* if (notificationData != null) {
             int count = 0;
             for (NotificationData notificationData1 : notificationDatas) {
