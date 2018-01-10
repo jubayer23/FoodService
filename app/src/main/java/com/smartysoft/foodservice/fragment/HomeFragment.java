@@ -62,7 +62,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG_REQUEST_HOME_PAGE = "tag_volley_request_in_home_page";
 
-    private Button  btn_stop_patrolling;
+    private Button btn_stop_patrolling;
 
     private RecyclerView recyclerView;
     private NotificationAdapter notificationAdapter;
@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
     private ImageView img_more;
-    private TextView tv_title, tv_name,tv_deadline, tv_no_delivery_alert;
+    private TextView tv_title, tv_name, tv_deadline, tv_no_delivery_alert;
 
     private LinearLayout ll_container_delivery_progress;
 
@@ -99,14 +99,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onActivityCreated(Bundle SavedInstanceState) {
         super.onActivityCreated(SavedInstanceState);
 
-        String  call_from = getArguments().getString(GlobalAppAccess.KEY_CALL_FROM);
+        String call_from = getArguments().getString(GlobalAppAccess.KEY_CALL_FROM);
 
-        if(call_from!=null && !call_from.isEmpty() && call_from.equals(MyFirebaseMessagingService.TAG_NOTIFICATION)){
+        if (call_from != null && !call_from.isEmpty() && call_from.equals(MyFirebaseMessagingService.TAG_NOTIFICATION)) {
             String notification_id = getArguments().getString(GlobalAppAccess.KEY_NOTIFICATION_ID);
 
             List<NotificationData> notificationDatas = MydApplication.getInstance().getPrefManger().getNotificationDatas();
-            for(NotificationData notificationData : notificationDatas){
-                if(notificationData.getData().getPathId().equals(notification_id)){
+            for (NotificationData notificationData : notificationDatas) {
+                if (notificationData.getData().getPathId().equals(notification_id)) {
                     showNotificationDialog(notificationData, false);
                     break;
                 }
@@ -172,15 +172,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override public void onItemClick(View view, int position) {
+                    @Override
+                    public void onItemClick(View view, int position) {
                         // TODO Handle item click
                         NotificationData running_notification_data = MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery();
                         NotificationData clickedNotificationData = notificationDatas.get(position);
 
-                        if(running_notification_data !=null && running_notification_data.getData().getPathId().equals(clickedNotificationData.getData().getPathId())){
-                            showNotificationDialog(notificationDatas.get(position),true);
-                        }else{
-                            showNotificationDialog(notificationDatas.get(position),false);
+                        if (running_notification_data != null && running_notification_data.getData().getPathId().equals(clickedNotificationData.getData().getPathId())) {
+                            showNotificationDialog(notificationDatas.get(position), true);
+                        } else {
+                            showNotificationDialog(notificationDatas.get(position), false);
                         }
 
 
@@ -189,11 +190,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         );
     }
 
-    private void updateUiIfThereIsNoDelivery(){
-        if(notificationDatas.isEmpty()){
+    private void updateUiIfThereIsNoDelivery() {
+        if (notificationDatas.isEmpty()) {
             tv_no_delivery_alert.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
-        }else{
+        } else {
             tv_no_delivery_alert.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
         }
@@ -288,7 +289,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                             String result = jsonObject.getString("result");
                             if (result.equals("1")) {
 
-                                if(dialog_start != null && dialog_start.isShowing()){
+                                if (dialog_start != null && dialog_start.isShowing()) {
                                     dialog_start.dismiss();
                                     dialog_start = null;
                                 }
@@ -297,6 +298,21 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                                 MydApplication.getInstance().getPrefManger().setCurrentlyRunningDelivery(notificationData);
 
                                 MydApplication.getInstance().getPrefManger().setPathId(jsonObject.getString("pathId"));
+
+
+                                /**
+                                 * Remove notification data which is start delivering from the list
+                                 * */
+                                int count = 0;
+                                for (NotificationData tempNotidicationData : notificationDatas) {
+                                    if (notificationData.getData().getPathId().equals(tempNotidicationData.getData().getPathId())) {
+                                        notificationDatas.remove(count);
+                                        MydApplication.getInstance().getPrefManger().setNotificationDatas(notificationDatas);
+                                        break;
+                                    }
+                                    count++;
+                                }
+
 
                                 startPatrollingSuccessUpdateUi(notificationData);
 
@@ -346,7 +362,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private void hitUrlForStopGps(String url, final String id, final String lat, final String lng, final String pathId, final String authImie) {
         // TODO Auto-generated method stub
 
-       // showProgressDialog("Stop Patrolling....", true, false);
+        // showProgressDialog("Stop Patrolling....", true, false);
 
         final StringRequest req = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -394,7 +410,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         req.setRetryPolicy(new DefaultRetryPolicy(30000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         // TODO Auto-generated method stub
-        MydApplication.getInstance().addToRequestQueue(req,TAG_REQUEST_HOME_PAGE);
+        MydApplication.getInstance().addToRequestQueue(req, TAG_REQUEST_HOME_PAGE);
     }
 
     private void startPatrollingSuccessUpdateUi(final NotificationData notificationData) {
@@ -425,10 +441,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         ll_container_delivery_progress.setVisibility(View.GONE);
 
-        if(notificationData != null){
+        /** we dont need below code as we already remove notification data while we
+         * starting the delivery
+         * */
+        
+       /* if (notificationData != null) {
             int count = 0;
-            for(NotificationData notificationData1: notificationDatas){
-                if(notificationData.getData().getPathId().equals(notificationData1.getData().getPathId())){
+            for (NotificationData notificationData1 : notificationDatas) {
+                if (notificationData.getData().getPathId().equals(notificationData1.getData().getPathId())) {
                     notificationDatas.remove(count);
                     MydApplication.getInstance().getPrefManger().setNotificationDatas(notificationDatas);
                     notificationAdapter.notifyDataSetChanged();
@@ -436,13 +456,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
                 count++;
             }
-        }
+        }*/
 
         MydApplication.getInstance().getPrefManger().setCurrentlyRunningDelivery("");
         MydApplication.getInstance().getPrefManger().setPathId("");
 
 
-        if(dialog_start != null && dialog_start.isShowing()){
+        if (dialog_start != null && dialog_start.isShowing()) {
             dialog_start.dismiss();
         }
 
@@ -459,24 +479,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 // now subscribe to `global` topic to receive app wide notifications
                 //FirebaseMessaging.getInstance().subscribeToTopic(Config.TOPIC_GLOBAL);
 
-               // displayFirebaseRegId();
+                // displayFirebaseRegId();
 
-                Log.d("DEBUG_fcm_id",MydApplication.getInstance().getPrefManger().getFcmRegId());
+                Log.d("DEBUG_fcm_id", MydApplication.getInstance().getPrefManger().getFcmRegId());
 
             } else if (intent.getAction().equals(GlobalAppAccess.PUSH_NOTIFICATION)) {
                 // new push notification is received
 
-               // String title = intent.getStringExtra("title");
-               // String message = intent.getStringExtra("message");
-               // String address = intent.getStringExtra("address");
-               // String mobile = intent.getStringExtra("mobile");
+                // String title = intent.getStringExtra("title");
+                // String message = intent.getStringExtra("message");
+                // String address = intent.getStringExtra("address");
+                // String mobile = intent.getStringExtra("mobile");
 
 
-               // Toast.makeText(getActivity(), "Push notification: " + message, Toast.LENGTH_LONG).show();
+                // Toast.makeText(getActivity(), "Push notification: " + message, Toast.LENGTH_LONG).show();
                 List<NotificationData> tempNotificationDataList = MydApplication.getInstance().getPrefManger().getNotificationDatas();
                 NotificationData latestNotification = tempNotificationDataList.get(tempNotificationDataList.size() - 1);
 
-                showNotificationDialog(latestNotification,false);
+                showNotificationDialog(latestNotification, false);
                 notificationDatas.add(latestNotification);
                 notificationAdapter.notifyDataSetChanged();
                 updateUiIfThereIsNoDelivery();
@@ -488,11 +508,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
 
     private Dialog dialog_start;
+
     private void showNotificationDialog(final NotificationData notificationData, boolean isDeliveryAlreadyRunning) {
-        if(dialog_start != null && dialog_start.isShowing()){
+        if (dialog_start != null && dialog_start.isShowing()) {
             dialog_start.dismiss();
         }
-       dialog_start = new Dialog(getActivity(),
+        dialog_start = new Dialog(getActivity(),
                 android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         dialog_start.setCancelable(true);
         dialog_start.setContentView(R.layout.dialog_notification);
@@ -507,20 +528,20 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         TextView tv_address = (TextView) dialog_start.findViewById(R.id.tv_address);
         TextView tv_status = (TextView) dialog_start.findViewById(R.id.tv_status);
 
-        Button btn_later = (Button) dialog_start.findViewById(R.id.btn_later) ;
+        Button btn_later = (Button) dialog_start.findViewById(R.id.btn_later);
         Button btn_start = (Button) dialog_start.findViewById(R.id.btn_start);
         Button btn_stop = (Button) dialog_start.findViewById(R.id.btn_stop);
 
         final ImageView img_close = (ImageView) dialog_start.findViewById(R.id.img_close_dialog);
 
 
-        if(isDeliveryAlreadyRunning){
+        if (isDeliveryAlreadyRunning) {
             btn_stop.setVisibility(View.VISIBLE);
             btn_later.setVisibility(View.GONE);
             btn_start.setVisibility(View.GONE);
             tv_status.setText("On progress");
             tv_status.setTextColor(getActivity().getResources().getColor(R.color.green));
-        }else{
+        } else {
             btn_stop.setVisibility(View.GONE);
             btn_later.setVisibility(View.VISIBLE);
             btn_start.setVisibility(View.VISIBLE);
@@ -537,8 +558,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         tv_name.setText(notificationData.getData().getName());
         tv_mobile.setText(notificationData.getData().getMobile());
         tv_address.setText(notificationData.getData().getAddress());
-
-
 
 
         btn_start.setOnClickListener(new View.OnClickListener() {
@@ -574,9 +593,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    private void startDelivery(final NotificationData notificationData){
-        if(MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() != null){
-            Toast.makeText(getActivity(),"You cannot start another delivery when you have a delivery already running on.",Toast.LENGTH_LONG).show();
+    private void startDelivery(final NotificationData notificationData) {
+        if (MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() != null) {
+            Toast.makeText(getActivity(), "You cannot start another delivery when you have a delivery already running on.", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -612,7 +631,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         myLocation.getLocation(getActivity(), locationResult);
     }
 
-    private void stopDelivery(){
+    private void stopDelivery() {
         LastLocationOnly lastLocationOnly = new LastLocationOnly(getActivity());
 
         if (!lastLocationOnly.canGetLocation()) {
@@ -626,7 +645,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             return;
         }
 
-        if(MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() == null){
+        if (MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery() == null) {
             stopPatrollingSuccessUpdateUi(null);
             return;
         }
