@@ -174,8 +174,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
                     @Override public void onItemClick(View view, int position) {
                         // TODO Handle item click
+                        NotificationData running_notification_data = MydApplication.getInstance().getPrefManger().getCurrentlyRunningDelivery();
+                        NotificationData clickedNotificationData = notificationDatas.get(position);
 
-                        showNotificationDialog(notificationDatas.get(position),false);
+                        if(running_notification_data !=null && running_notification_data.getData().getPathId().equals(clickedNotificationData.getData().getPathId())){
+                            showNotificationDialog(notificationDatas.get(position),true);
+                        }else{
+                            showNotificationDialog(notificationDatas.get(position),false);
+                        }
+
+
                     }
                 })
         );
